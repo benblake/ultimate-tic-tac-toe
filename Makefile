@@ -14,10 +14,12 @@
 
 # Points to the root of Google Test, relative to where this file is.
 # Remember to tweak this if you move this file.
-GTEST_DIR = ../googletest/googletest/
+GTEST_DIR = ../googletest/googletest
 
 # Where to find user code.
 USER_DIR = sample-test
+
+OUTPUT_DIR = out
 
 # Flags passed to the preprocessor.
 # Set Google Test's header directory as a system directory, such that
@@ -38,10 +40,11 @@ GTEST_HEADERS = $(GTEST_DIR)/include/gtest/*.h \
 
 # House-keeping build targets.
 
-all : $(TESTS)
+all : make_out_dir $(TESTS)
 
 clean :
 	rm -f $(TESTS) gtest.a gtest_main.a *.o
+	rm -rf $(OUTPUT_DIR)
 
 # Builds gtest.a and gtest_main.a.
 
@@ -79,4 +82,7 @@ sample1_unittest.o : $(USER_DIR)/sample1_unittest.cc \
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/sample1_unittest.cc
 
 sample1_unittest : sample1.o sample1_unittest.o gtest_main.a
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $(OUTPUT_DIR)/$@
+
+make_out_dir :
+	@mkdir $(OUTPUT_DIR)
