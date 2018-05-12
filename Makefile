@@ -17,7 +17,8 @@
 GTEST_DIR = ../googletest/googletest
 
 # Where to find user code.
-USER_DIR = sample-test
+SRC_DIR = src
+TEST_DIR = test
 
 OUTPUT_DIR = out
 
@@ -25,13 +26,14 @@ OUTPUT_DIR = out
 # Set Google Test's header directory as a system directory, such that
 # the compiler doesn't generate warnings in Google Test headers.
 CPPFLAGS += -isystem $(GTEST_DIR)/include
+CPPFLAGS += -I./$(SRC_DIR)
 
 # Flags passed to the C++ compiler.
 CXXFLAGS += -g -Wall -Wextra -pthread
 
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
-TESTS = sample1_unittest
+TESTS = TicTacToeGameUnitTest
 
 # All Google Test headers.  Usually you shouldn't change this
 # definition.
@@ -41,6 +43,9 @@ GTEST_HEADERS = $(GTEST_DIR)/include/gtest/*.h \
 # House-keeping build targets.
 
 all : make_out_dir $(TESTS)
+
+run : all
+	$(OUTPUT_DIR)/$(TESTS)
 
 clean :
 	rm -f $(TESTS) gtest.a gtest_main.a *.o
@@ -73,16 +78,15 @@ gtest_main.a : gtest-all.o gtest_main.o
 # Builds a sample test.  A test should link with either gtest.a or
 # gtest_main.a, depending on whether it defines its own main()
 # function.
+TicTacToeGame.o : $(SRC_DIR)/TicTacToeGame.cpp $(SRC_DIR)/TicTacToeGame.h $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(SRC_DIR)/TicTacToeGame.cpp
 
-sample1.o : $(USER_DIR)/sample1.cc $(USER_DIR)/sample1.h $(GTEST_HEADERS)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/sample1.cc
+TicTacToeGameUnitTest.o : $(TEST_DIR)/TicTacToeGameUnitTest.cpp \
+                     $(SRC_DIR)/TicTacToeGame.h $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(TEST_DIR)/TicTacToeGameUnitTest.cpp
 
-sample1_unittest.o : $(USER_DIR)/sample1_unittest.cc \
-                     $(USER_DIR)/sample1.h $(GTEST_HEADERS)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/sample1_unittest.cc
-
-sample1_unittest : sample1.o sample1_unittest.o gtest_main.a
+TicTacToeGameUnitTest : TicTacToeGame.o TicTacToeGameUnitTest.o gtest_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $(OUTPUT_DIR)/$@
 
 make_out_dir :
-	@mkdir $(OUTPUT_DIR)
+	@mkdir -p $(OUTPUT_DIR)
