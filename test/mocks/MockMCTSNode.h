@@ -4,8 +4,9 @@
 
 class MockMCTSNode : public MCTSNode {
 public:
-    // MOCK_METHOD0(determineLeafNode, MCTSNode*());
-    MOCK_METHOD0(isLeafNode, bool());
+    MOCK_METHOD0(hasUnvisitedChildren, bool());
     MOCK_METHOD0(selectChildNode, MCTSNode*());
-
+    MOCK_METHOD0(getUnvisitedChildNode, MCTSNode*());
+    MOCK_METHOD0(simulateGames, void());
+    MOCK_METHOD0(backPropagateResults, void());
 };
