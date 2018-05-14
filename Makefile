@@ -43,10 +43,13 @@ CXXFLAGS += -g -Wall -Wextra -pthread
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
 # TESTS = gmock_test
-TESTS = MCTSTest
+TESTS = MCTSTest \
+		MCTSNodeTest \
+		GameStateTest
 
 SRC_HEADERS = $(SRC_DIR)/MCTS.h \
-			  $(SRC_DIR)/MCTSNode.h
+			  $(SRC_DIR)/MCTSNode.h \
+			  $(SRC_DIR)/GameState.h
 
 # All Google Test headers.  Usually you shouldn't change this
 # definition.
@@ -65,7 +68,10 @@ GMOCK_HEADERS = $(GMOCK_DIR)/include/gmock/*.h \
 all : make_out_dir $(TESTS)
 
 run : all
-	$(OUTPUT_DIR)/$(TESTS)
+	# $(OUTPUT_DIR)/MCTSTest
+	# $(OUTPUT_DIR)/MCTSNodeTest
+	$(OUTPUT_DIR)/GameStateTest
+	# $(OUTPUT_DIR)/$(TESTS)
 
 clean :
 	rm -f $(TESTS) gmock.a gmock_main.a *.o
@@ -117,6 +123,18 @@ MCTSTest.o : $(TEST_DIR)/MCTSTest.cpp $(GMOCK_HEADERS) $(SRC_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(TEST_DIR)/MCTSTest.cpp
 
 MCTSTest : MCTSTest.o gmock_main.a
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $(OUTPUT_DIR)/$@
+
+MCTSNodeTest.o : $(TEST_DIR)/MCTSNodeTest.cpp $(GMOCK_HEADERS) $(SRC_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(TEST_DIR)/MCTSNodeTest.cpp
+
+MCTSNodeTest : MCTSNodeTest.o gmock_main.a
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $(OUTPUT_DIR)/$@
+
+GameStateTest.o : $(TEST_DIR)/GameStateTest.cpp $(GMOCK_HEADERS) $(SRC_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(TEST_DIR)/GameStateTest.cpp
+
+GameStateTest : GameStateTest.o gmock_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $(OUTPUT_DIR)/$@
 
 make_out_dir :

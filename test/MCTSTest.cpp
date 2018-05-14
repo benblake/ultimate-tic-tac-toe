@@ -1,4 +1,3 @@
-// #include "path/to/mock-turtle.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -145,8 +144,6 @@ TEST(MCTSIterateTest, IterateConsistsOfOneLoopOfAllMethods) {
     searchTree.iterate();
 }
 }
-
-
 
 int main(int argc, char** argv) {
   // The following line must be executed to initialize Google Mock
