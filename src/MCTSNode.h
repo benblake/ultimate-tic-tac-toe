@@ -6,59 +6,13 @@
 #include "time.h"
 
 class MCTSNode {
-public:
-    MCTSNode(MCTSNode *parentNode, GameState *gs, bool playerATurn) {
-        srand(time(NULL));
-        mParentNode = parentNode;
-        mGameState = gs;
-        mPlayerATurn = playerATurn;
-        mNumberOfVisits = 0;
-        mNumberOfWins = 0;
-    }
-
-    ~MCTSNode() {
-        delete mGameState;
-        for (MCTSNode *node : mChildNodes) {
-            delete node;
-        }
-    }
-
-    void printPlayerACells() {
-        mGameState->printPlayerACells();
-    }
-
-    void printPlayerBCells() {
-        mGameState->printPlayerBCells();
-    }
-
-    void printValidMoves() {
-        mGameState->printValidMoves();
-    }
-
-    void printBestMove() {
-        MCTSNode *childNode = mChildNodes[0];
-        double maxSelectionValue = upperConfidenceBound2(mChildNodes[0]);
-
-        for (MCTSNode *node : mChildNodes) {
-            double selectionValue = upperConfidenceBound2(node);
-            if (selectionValue > maxSelectionValue) {
-                maxSelectionValue = selectionValue;
-                childNode = node;
-            }
-        }
-        // std::cout << "maxSelectionValue = " << maxSelectionValue << std::endl;
-        // std::cout << childNode->getNumberOfWins() << "/" << childNode->getNumberOfVisits() << std::endl;
-        childNode->printPlayerACells();
-    }
-    // MCTSNode(MCTSNode *parentNode) {
-    //     MCTSNode();
-    //     mParentNode = parentNode;
-    // }
-    // MCTSNode() {
-    //     mParentNode = nullptr;
-    //     mGameState = nullptr;
-    //     mNumberOfVisits = 0;
-    // }
+private:
+    int mNumberOfVisits;
+    int mNumberOfWins;
+    MCTSNode *mParentNode;
+    GameState *mGameState;
+    bool mPlayerATurn;
+    std::vector<MCTSNode *> mChildNodes;
 
     int getNumberOfVisits() {
         return mNumberOfVisits;
@@ -68,59 +22,15 @@ public:
         return mNumberOfWins;
     }
 
-    // std::vector<MCTSNode *> getChildren() {
-    //     return mChildNodes;
-    // }
-
-    bool hasUnvisitedChildren() {
-        if (mChildNodes.size() == 0) {
-            return true;
-        }
-        for (MCTSNode *node : mChildNodes) {
-            if (node->getNumberOfVisits() == 0) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    MCTSNode *selectChildNode() {
-        MCTSNode *childNode = mChildNodes[0];
-        double maxSelectionValue = upperConfidenceBound(mChildNodes[0]);
-
-        for (MCTSNode *node : mChildNodes) {
-            double selectionValue = upperConfidenceBound(node);
-            if (selectionValue > maxSelectionValue) {
-                maxSelectionValue = selectionValue;
-                childNode = node;
-            }
-        }
-                // std::cout << "maxSelectionValue = " << maxSelectionValue << std::endl;
-
-        return childNode;
-    }
-
-    double upperConfidenceBound(MCTSNode *childNode) {
-        double ucb = (double) childNode->getNumberOfWins() /
-                     (double) childNode->getNumberOfVisits();
-        // ucb += 1 * sqrt(log((double) mNumberOfVisits) / (double) childNode->getNumberOfVisits());
-        ucb += 2 * sqrt(log((double) mNumberOfVisits) / (double) childNode->getNumberOfVisits());
+    double upperConfidenceBound(int parentNumberOfVisits) {
+        double ucb = (double) mNumberOfWins / (double) mNumberOfVisits;
+        ucb += 2 * sqrt(log((double) parentNumberOfVisits) / (double) mNumberOfVisits);
 
         return ucb;
     }
 
-    double upperConfidenceBound2(MCTSNode *childNode) {
-        double ucb = (double) childNode->getNumberOfWins() /
-                     (double) childNode->getNumberOfVisits();
-
-        return ucb;
-    }
-    
-    MCTSNode *getUnvisitedChildNode() {
-        if (mChildNodes.size() == 0) {
-            generateChildNodes();
-        }
-        return getFirstUnvisitedChildNode();
+    double getWinRatio() {
+        return (double) mNumberOfWins / (double) mNumberOfVisits;
     }
 
     void generateChildNodes() {
@@ -174,6 +84,56 @@ public:
         mNumberOfVisits++;
     }
 
+public:
+    MCTSNode(MCTSNode *parentNode, GameState *gs, bool playerATurn) {
+        srand(time(NULL));
+        mParentNode = parentNode;
+        mGameState = gs;
+        mPlayerATurn = playerATurn;
+        mNumberOfVisits = 0;
+        mNumberOfWins = 0;
+    }
+
+    ~MCTSNode() {
+        delete mGameState;
+        for (MCTSNode *node : mChildNodes) {
+            delete node;
+        }
+    }
+
+    bool hasUnvisitedChildren() {
+        if (mChildNodes.size() == 0) {
+            return true;
+        }
+        for (MCTSNode *node : mChildNodes) {
+            if (node->getNumberOfVisits() == 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    MCTSNode *selectChildNode() {
+        MCTSNode *childNode = mChildNodes[0];
+        double maxSelectionValue = childNode->upperConfidenceBound(mNumberOfVisits);
+
+        for (MCTSNode *node : mChildNodes) {
+            double selectionValue = node->upperConfidenceBound(mNumberOfVisits);
+            if (selectionValue > maxSelectionValue) {
+                maxSelectionValue = selectionValue;
+                childNode = node;
+            }
+        }
+
+        return childNode;
+    }
+
+    MCTSNode *getUnvisitedChildNode() {
+        if (mChildNodes.size() == 0) {
+            generateChildNodes();
+        }
+        return getFirstUnvisitedChildNode();
+    }
 
     int simulateGames() {
         // srand(time(NULL));
@@ -186,14 +146,10 @@ public:
         while (gs.getValidMoves().size() != 0) {
             // std::cout << "player A turn = " << playerATurn << std::endl;
             if (gs.playerAWins()) {
-                // return true;
                 // std::cout << "player A wins" << std::endl;
-                // printPlayerACells();
                 return 1;
             } else if (gs.playerBWins()) {
-                // return false;
                 // std::cout << "player B wins" << std::endl;
-                // printPlayerBCells();
                 return -1;
             }
 
@@ -202,7 +158,6 @@ public:
             std::vector<Cell> validMoves = gs.getValidMoves();
 
             int index = rand() % validMoves.size();
-            // int index = 0;
             if (playerATurn) {
                 playerACells.push_back(validMoves[index]);
             } else {
@@ -222,26 +177,19 @@ public:
             playerATurn = !playerATurn;
         }
         if (gs.playerAWins()) {
-            // return true;
             return 1;
-        // } else {
         } else if (gs.playerBWins()) {
-            // return false;
             return -1;
         } else {
             return 0;
         }
     }
 
-    // void backPropagateResults(bool playerAWins) {
     void backPropagateResults(int gameResult) {
         mNumberOfVisits++;
-        // if (playerAWins) {
-            // mNumberOfWins++;
-            mNumberOfWins += gameResult;
-        // }
+        mNumberOfWins += gameResult;
+
         if (mParentNode != nullptr) {
-            // mParentNode->backPropagateResults(playerAWins);
             mParentNode->backPropagateResults(gameResult);
         }
     }
@@ -250,13 +198,31 @@ public:
         std::cout << mNumberOfWins << "/" << mNumberOfVisits << std::endl;
     }
 
-private:
-    int mNumberOfVisits;
-    int mNumberOfWins;
-    MCTSNode *mParentNode;
-    GameState *mGameState;
-    bool mPlayerATurn;
-    std::vector<MCTSNode *> mChildNodes;
+    void printBestMove() {
+        MCTSNode *childNode = mChildNodes[0];
+        double maxSelectionValue = childNode->getWinRatio();
+
+        for (MCTSNode *node : mChildNodes) {
+            double selectionValue = node->getWinRatio();
+            if (selectionValue > maxSelectionValue) {
+                maxSelectionValue = selectionValue;
+                childNode = node;
+            }
+        }
+        childNode->printPlayerACells();
+    }
+
+    void printPlayerACells() {
+        mGameState->printPlayerACells();
+    }
+
+    void printPlayerBCells() {
+        mGameState->printPlayerBCells();
+    }
+
+    void printValidMoves() {
+        mGameState->printValidMoves();
+    }
 };
 
 
