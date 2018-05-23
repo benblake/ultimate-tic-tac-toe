@@ -53,6 +53,17 @@ public:
     //     simulate(unvisitedNode);
     //     backPropagate(unvisitedNode);
     // }
+
+    void iterate() {
+        MCTSNode *selectedNode = select();
+
+        MCTSNode *expandedNode = expand(selectedNode);
+
+        for (int j = 0; j < 20; j++) {
+            int gameResult = simulate(expandedNode);
+            backPropagate(expandedNode, gameResult);
+        }
+    }
 };
 
 
