@@ -14,76 +14,6 @@ private:
     bool mPlayerATurn;
     std::vector<MCTSNode *> mChildNodes;
 
-    int getNumberOfVisits() {
-        return mNumberOfVisits;
-    }
-
-    int getNumberOfWins() {
-        return mNumberOfWins;
-    }
-
-    double upperConfidenceBound(int parentNumberOfVisits) {
-        double ucb = (double) mNumberOfWins / (double) mNumberOfVisits;
-        ucb += 2 * sqrt(log((double) parentNumberOfVisits) / (double) mNumberOfVisits);
-
-        return ucb;
-    }
-
-    double getWinRatio() {
-        return (double) mNumberOfWins / (double) mNumberOfVisits;
-    }
-
-    void generateChildNodes() {
-        std::vector<Cell> playerACells = mGameState->getPlayerACells();
-        std::vector<Cell> playerBCells = mGameState->getPlayerBCells();
-        std::vector<Cell> validMoves = mGameState->getValidMoves();
-
-        for (size_t i = 0; i < validMoves.size(); i++) {
-            if (mPlayerATurn) { // children will be player B turn
-                playerBCells.push_back(validMoves[i]);
-            } else {
-                playerACells.push_back(validMoves[i]);
-            }
-            std::vector<Cell> newValidMoves;
-            for (size_t j = 0; j < validMoves.size(); j++) {
-                if (j != i) {
-                    newValidMoves.push_back(validMoves[j]);
-                }
-            }
-            GameState *gs = new GameState(playerACells, playerBCells, newValidMoves);
-            mChildNodes.push_back(new MCTSNode(this, gs, !mPlayerATurn));
-            if (mPlayerATurn) { // children will be player B turn
-                playerBCells.pop_back();
-            } else {
-                playerACells.pop_back();
-            }
-        }
-    }
-
-    MCTSNode *getFirstUnvisitedChildNode() {
-        for (MCTSNode *node : mChildNodes) {
-            if (node->getNumberOfVisits() == 0) {
-                return node;
-            }
-        }
-        return this; // if no child nodes must be a leaf
-    }
-
-    void printChildNodes() {
-        for (size_t i = 0; i < mChildNodes.size(); i++) {
-            std::cout << "NODE " << i << "-----------------------" << std::endl;
-
-            mChildNodes[i]->printPlayerACells();
-            std::cout << "-----------------------" << std::endl;
-
-            mChildNodes[i]->printValidMoves();
-        }
-    }
-
-    void setVisited() {
-        mNumberOfVisits++;
-    }
-
 public:
     MCTSNode(MCTSNode *parentNode, GameState *gs, bool playerATurn) {
         srand(time(NULL));
@@ -136,12 +66,7 @@ public:
     }
 
     int simulateGames() {
-        // srand(time(NULL));
-        std::vector<Cell> playerACells = mGameState->getPlayerACells();
-        std::vector<Cell> playerBCells = mGameState->getPlayerBCells();
-        std::vector<Cell> validMoves = mGameState->getValidMoves();
-        GameState gs(playerACells, playerBCells, validMoves);
-        // GameState gs = *mGameState;
+        GameState gs = *mGameState;
         bool playerATurn = !mPlayerATurn;
         while (gs.getValidMoves().size() != 0) {
             // std::cout << "player A turn = " << playerATurn << std::endl;
@@ -223,7 +148,77 @@ public:
     void printValidMoves() {
         mGameState->printValidMoves();
     }
-};
 
+private:
+    int getNumberOfVisits() {
+        return mNumberOfVisits;
+    }
+
+    int getNumberOfWins() {
+        return mNumberOfWins;
+    }
+
+    double upperConfidenceBound(int parentNumberOfVisits) {
+        double ucb = (double) mNumberOfWins / (double) mNumberOfVisits;
+        ucb += 2 * sqrt(log((double) parentNumberOfVisits) / (double) mNumberOfVisits);
+
+        return ucb;
+    }
+
+    double getWinRatio() {
+        return (double) mNumberOfWins / (double) mNumberOfVisits;
+    }
+
+    void generateChildNodes() {
+        std::vector<Cell> playerACells = mGameState->getPlayerACells();
+        std::vector<Cell> playerBCells = mGameState->getPlayerBCells();
+        std::vector<Cell> validMoves = mGameState->getValidMoves();
+
+        for (size_t i = 0; i < validMoves.size(); i++) {
+            if (mPlayerATurn) { // children will be player B turn
+                playerBCells.push_back(validMoves[i]);
+            } else {
+                playerACells.push_back(validMoves[i]);
+            }
+            std::vector<Cell> newValidMoves;
+            for (size_t j = 0; j < validMoves.size(); j++) {
+                if (j != i) {
+                    newValidMoves.push_back(validMoves[j]);
+                }
+            }
+            GameState *gs = new GameState(playerACells, playerBCells, newValidMoves);
+            mChildNodes.push_back(new MCTSNode(this, gs, !mPlayerATurn));
+            if (mPlayerATurn) { // children will be player B turn
+                playerBCells.pop_back();
+            } else {
+                playerACells.pop_back();
+            }
+        }
+    }
+
+    MCTSNode *getFirstUnvisitedChildNode() {
+        for (MCTSNode *node : mChildNodes) {
+            if (node->getNumberOfVisits() == 0) {
+                return node;
+            }
+        }
+        return this; // if no child nodes must be a leaf
+    }
+
+    void printChildNodes() {
+        for (size_t i = 0; i < mChildNodes.size(); i++) {
+            std::cout << "NODE " << i << "-----------------------" << std::endl;
+
+            mChildNodes[i]->printPlayerACells();
+            std::cout << "-----------------------" << std::endl;
+
+            mChildNodes[i]->printValidMoves();
+        }
+    }
+
+    void setVisited() {
+        mNumberOfVisits++;
+    }
+};
 
 #endif // MCTS_NODE_H
