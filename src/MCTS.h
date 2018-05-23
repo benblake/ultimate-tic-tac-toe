@@ -2,6 +2,7 @@
 #define MCTS_H
 
 #include "MCTSNode.h"
+#include "GameState.h"
 
 class MCTS {
 
@@ -9,9 +10,11 @@ private:
     MCTSNode *mRootNode;
 
 public:
-    MCTS(MCTSNode *rootNode) {
-        mRootNode = rootNode;
+    MCTS(GameState *gs) {
+        mRootNode = new MCTSNode(nullptr, gs, false);
     }
+
+    ~MCTS() {}
 
     MCTSNode *select() {
         MCTSNode *currentNode = mRootNode;
@@ -25,20 +28,31 @@ public:
         return parentNode->getUnvisitedChildNode();
     }
 
-    void simulate(MCTSNode *node) {
-        node->simulateGames();
+    // bool simulate(MCTSNode *node) {
+    int simulate(MCTSNode *node) {
+        return node->simulateGames();
     }
 
-    void backPropagate(MCTSNode *node) {
-        node->backPropagateResults();
+    // void backPropagate(MCTSNode *node, bool playerAWins) {
+    void backPropagate(MCTSNode *node, int gameResult) {
+        // node->backPropagateResults(playerAWins);
+        node->backPropagateResults(gameResult);
     }
 
-    void iterate() {
-        MCTSNode *childNode = select();
-        MCTSNode *unvisitedNode = expand(childNode);
-        simulate(unvisitedNode);
-        backPropagate(unvisitedNode);
+    void printRootResults() {
+        mRootNode->printResults();
     }
+
+    void printBestMove() {
+        mRootNode->printBestMove();
+    }
+
+    // void iterate() {
+    //     MCTSNode *childNode = select();
+    //     MCTSNode *unvisitedNode = expand(childNode);
+    //     simulate(unvisitedNode);
+    //     backPropagate(unvisitedNode);
+    // }
 };
 
 

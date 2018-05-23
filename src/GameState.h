@@ -28,12 +28,41 @@ public:
         return playerWins(mPlayerBCells);
     }
 
+    void printPlayerACells() {
+        for (Cell &c : mPlayerACells) {
+            std::cout << c.x << " " << c.y << std::endl; 
+        }
+    }
+
+    void printPlayerBCells() {
+        for (Cell &c : mPlayerBCells) {
+            std::cout << c.x << " " << c.y << std::endl; 
+        }
+    }
+
+    void printValidMoves() {
+        for (Cell &c : mValidMoves) {
+            std::cout << c.x << " " << c.y << std::endl; 
+        }
+    }
+
+    std::vector<Cell> getPlayerACells() {
+        return mPlayerACells;
+    }
+    std::vector<Cell> getPlayerBCells() {
+        return mPlayerBCells;
+    }
+    std::vector<Cell> getValidMoves() {
+        return mValidMoves;
+    }
+
+
 private:
     std::vector<Cell> mPlayerACells;
     std::vector<Cell> mPlayerBCells;
     std::vector<Cell> mValidMoves;
 
-    bool playerWins(std::vector<Cell> &playerCells) {
+    bool playerWins(const std::vector<Cell> &playerCells) {
         int rowTally[3] = {0, 0, 0};
         int colTally[3] = {0, 0, 0};
         int diagTally[3] = {0, 0, 0};
