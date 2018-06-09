@@ -3,6 +3,7 @@
 
 #include <cmath>
 #include "GameState.h"
+#include "GameSimulator.h"
 #include "time.h"
 
 class MCTSNode {
@@ -26,8 +27,10 @@ public:
 
     ~MCTSNode() {
         delete mGameState;
+        mGameState = nullptr;
         for (MCTSNode *node : mChildNodes) {
             delete node;
+            node = nullptr;
         }
     }
 
@@ -66,48 +69,8 @@ public:
     }
 
     int simulateGames() {
-        GameState gs = *mGameState;
-        bool playerATurn = !mPlayerATurn;
-        while (gs.getValidMoves().size() != 0) {
-            // std::cout << "player A turn = " << playerATurn << std::endl;
-            if (gs.playerAWins()) {
-                // std::cout << "player A wins" << std::endl;
-                return 1;
-            } else if (gs.playerBWins()) {
-                // std::cout << "player B wins" << std::endl;
-                return -1;
-            }
-
-            std::vector<Cell> playerACells = gs.getPlayerACells();
-            std::vector<Cell> playerBCells = gs.getPlayerBCells();
-            std::vector<Cell> validMoves = gs.getValidMoves();
-
-            int index = rand() % validMoves.size();
-            if (playerATurn) {
-                playerACells.push_back(validMoves[index]);
-            } else {
-                playerBCells.push_back(validMoves[index]);
-            }
-
-            // if (playerATurn) {
-            //     std::cout << "player A move = " << validMoves[index].x << " " << validMoves[index].y << std::endl;
-            // } else {
-            //     std::cout << "player B move = " << validMoves[index].x << " " << validMoves[index].y << std::endl;
-            // }
-
-            validMoves.erase(validMoves.begin() + index);
-
-            gs = GameState(playerACells, playerBCells, validMoves);
-
-            playerATurn = !playerATurn;
-        }
-        if (gs.playerAWins()) {
-            return 1;
-        } else if (gs.playerBWins()) {
-            return -1;
-        } else {
-            return 0;
-        }
+        GameSimulator gameSimulator;
+        return gameSimulator.simulateGame(*mGameState, !mPlayerATurn);
     }
 
     void backPropagateResults(int gameResult) {

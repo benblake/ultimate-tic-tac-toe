@@ -8,7 +8,8 @@ CXX = g++
 
 SRC_HEADERS = $(SRC_DIR)/MCTS.h \
 			  $(SRC_DIR)/MCTSNode.h \
-			  $(SRC_DIR)/GameState.h
+			  $(SRC_DIR)/GameState.h \
+			  $(SRC_DIR)/GameSimulator.h
 
 all : make_out_dir main
 

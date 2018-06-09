@@ -25,11 +25,11 @@ public:
         mValidMoves = validMoves;
     }
 
-    bool playerAWins() {
+    bool playerAWins() const {
         return playerWins(mPlayerACells);
     }
 
-    bool playerBWins() {
+    bool playerBWins() const {
         return playerWins(mPlayerBCells);
     }
 
@@ -51,18 +51,18 @@ public:
         }
     }
 
-    std::vector<Cell> getPlayerACells() {
+    std::vector<Cell> getPlayerACells() const {
         return mPlayerACells;
     }
-    std::vector<Cell> getPlayerBCells() {
+    std::vector<Cell> getPlayerBCells() const {
         return mPlayerBCells;
     }
-    std::vector<Cell> getValidMoves() {
+    std::vector<Cell> getValidMoves() const {
         return mValidMoves;
     }
 
 private:
-    bool playerWins(const std::vector<Cell> &playerCells) {
+    bool playerWins(const std::vector<Cell> &playerCells) const {
         int rowTally[3] = {0, 0, 0};
         int colTally[3] = {0, 0, 0};
         int diagTally[3] = {0, 0, 0};
